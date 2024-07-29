@@ -1,0 +1,83 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdexcept>
+
+void compress(const std::string& inputFile, const std::string& outputFile) {
+    std::ifstream inFile(inputFile);
+    if (!inFile.is_open()) {
+        throw std::runtime_error("Could not open input file.");
+    }
+
+    std::ofstream outFile(outputFile);
+    if (!outFile.is_open()) {
+        throw std::runtime_error("Could not open output file.");
+    }
+
+    char currentChar;
+    char previousChar = '\0';
+    int count = 0;
+
+    while (inFile.get(currentChar)) {
+        if (currentChar == previousChar) {
+            count++;
+        } else {
+            if (count > 0) {
+                outFile << count << previousChar;
+            }
+            previousChar = currentChar;
+            count = 1;
+        }
+    }
+    if (count > 0) {
+        outFile << count << previousChar;
+    }
+
+    inFile.close();
+    outFile.close();
+}
+
+void decompress(const std::string& inputFile, const std::string& outputFile) {
+    std::ifstream inFile(inputFile);
+    if (!inFile.is_open()) {
+        throw std::runtime_error("Could not open input file.");
+    }
+
+    std::ofstream outFile(outputFile);
+    if (!outFile.is_open()) {
+        throw std::runtime_error("Could not open output file.");
+    }
+
+    int count;
+    char currentChar;
+
+    while (inFile >> count >> currentChar) {
+        for (int i = 0; i < count; i++) {
+            outFile << currentChar;
+        }
+    }
+
+    inFile.close();
+    outFile.close();
+}
+
+int main() {
+    std::string inputFile, compressedFile, decompressedFile;
+
+    std::cout << "Enter the input file name: ";
+    std::cin >> inputFile;
+    compressedFile = inputFile + ".rle";
+    decompressedFile = "decompressed_" + inputFile;
+
+    try {
+        compress(inputFile, compressedFile);
+        std::cout << "File compressed to: " << compressedFile << std::endl;
+
+        decompress(compressedFile, decompressedFile);
+        std::cout << "File decompressed to: " << decompressedFile << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    return 0;
+}
